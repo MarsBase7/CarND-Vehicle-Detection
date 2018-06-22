@@ -1,37 +1,158 @@
-# Vehicle Detection
-[![Udacity - Self-Driving Car NanoDegree](https://s3.amazonaws.com/udacity-sdc/github/shield-carnd.svg)](http://www.udacity.com/drive)
+# **Vehicle Detection**
+
+[//]: # (Image References)
+
+[image0]: ./examples/cover.png
+[image1]: ./output_images/training_data_samples.png
+[image2]: ./output_images/HOG_features.png
+[image3]: ./output_images/spatial_samples.png
+[image4]: ./output_images/slide_window.png
+[image5]: ./output_images/heatmap.png
 
 
-In this project, your goal is to write a software pipeline to detect vehicles in a video (start with the test_video.mp4 and later implement on full project_video.mp4), but the main output or product we want you to create is a detailed writeup of the project.  Check out the [writeup template](https://github.com/udacity/CarND-Vehicle-Detection/blob/master/writeup_template.md) for this project and use it as a starting point for creating your own writeup.  
+This is a brief writeup report of Self-Driving Car Engineer P5.
 
-Creating a great writeup:
+<img src="./examples/cover.png" width="50%" height="50%" />
+
 ---
-A great writeup should include the rubric points as well as your description of how you addressed each point.  You should include a detailed description of the code used in each step (with line-number references and code snippets where necessary), and links to other supporting documents or external references.  You should include images in your writeup to demonstrate how your code works with examples.  
 
-All that said, please be concise!  We're not looking for you to write a book here, just a brief description of how you passed each rubric point, and references to the relevant code :). 
 
-You can submit your writeup in markdown or use another method and submit a pdf instead.
+**Vehicle Detection Project**
 
-The Project
----
+* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images.
 
-The goals / steps of this project are the following:
+* Apply a color transform and append binned color features, as well as histograms of color, to the HOG feature vector.
 
-* Perform a Histogram of Oriented Gradients (HOG) feature extraction on a labeled training set of images and train a classifier Linear SVM classifier
-* Optionally, you can also apply a color transform and append binned color features, as well as histograms of color, to your HOG feature vector. 
-* Note: for those first two steps don't forget to normalize your features and randomize a selection for training and testing.
-* Implement a sliding-window technique and use your trained classifier to search for vehicles in images.
-* Run your pipeline on a video stream (start with the test_video.mp4 and later implement on full project_video.mp4) and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
+* Normalize the features and randomize a selection for training and testing.
+
+* Train a Linear SVM classifier.
+
+* Implement a sliding-window technique and use the trained classifier to search for vehicles in images.
+
+* Run the pipeline on a video stream and create a heat map of recurring detections frame by frame to reject outliers and follow detected vehicles.
+
 * Estimate a bounding box for vehicles detected.
 
-Here are links to the labeled data for [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) examples to train your classifier.  These example images come from a combination of the [GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), the [KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), and examples extracted from the project video itself.   You are welcome and encouraged to take advantage of the recently released [Udacity labeled dataset](https://github.com/udacity/self-driving-car/tree/master/annotations) to augment your training data.  
+<Br/>
 
-Some example images for testing your pipeline on single frames are located in the `test_images` folder.  To help the reviewer examine your work, please save examples of the output from each stage of your pipeline in the folder called `ouput_images`, and include them in your writeup for the project by describing what each image shows.    The video called `project_video.mp4` is the video your pipeline should work well on.  
+## Feature Extractionon
 
-**As an optional challenge** Once you have a working pipeline for vehicle detection, add in your lane-finding algorithm from the last project to do simultaneous lane-finding and vehicle detection!
+The code for this step is contained in the 2nd to 10th code cells of the IPython notebook located in `P5.ipynb`
 
-**If you're feeling ambitious** (also totally optional though), don't stop there!  We encourage you to go out and take video of your own, and show us how you would implement this project on a new video!
+#### 1. Traing Data
 
-## How to write a README
-A well written README file can enhance your project and portfolio.  Develop your abilities to create professional README files by completing [this free course](https://www.udacity.com/course/writing-readmes--ud777).
+The traing data includes two parts of labeled [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) examples. It has 8792 vehicle images and 8968 non-vehicle images, which are from a combination of the [GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), the [KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), and examples extracted from the project video itself.
 
+Here are sample images:
+
+![alt text][image1]
+
+#### 2. Histogram of Oriented Gradients (HOG)
+
+The parameters of HOG are set as follow:
+
+* HOG color channel `color_space = 'YCrCb'`
+
+* HOG orientations `orient = 9` 
+
+* HOG pixels per cell `pix_per_cell = 8` 
+
+* HOG cells per block `cell_per_block = 2` 
+
+* HOG channels to extract `hog_channel = 'ALL'`
+
+Here are extracted HOG features in gray from sample images of training data set:
+
+![alt text][image2]
+
+#### 3. Append binned color features, histograms of color, to the HOG feature vector
+
+The parameters of color related features extractionon are set as follow:
+
+* Spatial binning dimensions `spatial_size = (32, 32)` 
+
+* Number of histogram bins `hist_bins = 32`
+
+The spatial size of 32x32 can still have the vehicle shape:
+
+32x32 pixels is the final spatial size because of its
+vehicle shape obvious yet:
+
+![alt text][image3]
+
+<Br/>
+
+## Train a Linear SVM classifier
+
+The code for this step is contained in the 11th and 12th code cells of the IPython notebook located in `P5.ipynb`
+
+By concatenating 9 orientations 8 pixels per cell and 2 cells per block HOG, as well as binned color features and histograms of color, the feature vector has 8460 length.
+
+First, use `sklearn.model_selection.train_test_split()` function to split full data set into training and testing set, and random their orders to avoid overfitting.
+
+After that, use `sklearn.preprocessing.StandardScaler()` to normalize `X_train`, then transform both `X_train` and `X_test`.
+
+Finally, the linear SVM classifier cost **23.79** seconds to train, and test accuracy is **98.73%**.
+
+<Br/>
+
+
+## Sliding Window Search and Heat Map
+
+The code for this step is contained in the 13th to 22th code cells of the IPython notebook located in `P5.ipynb`
+
+#### 1. Implement sliding-window technique
+
+Three sizes of sliding-windows are choosen in the project.
+
+| xy_window        | xy_overlap   | y_start_stop |
+|:-------------:|:-------------:| :---:|
+| (64, 64)      | (0.8, 0.8)        | [400, 496]
+| (96, 96)      | (0.7, 0.7)      |[400,544]
+| (128, 128)     | (0.5, 0.5)      |[500,692]
+
+The layout of sliding-windows is like this:
+
+![alt text][image4]
+
+#### 2. Implement heatmap technique
+
+Use `scipy.ndimage.measurements.label()` to find the heat map of each vehicle detected hot windows, and the threshold of heat point is `2`, which can reject outliers.
+
+Here are the results of combining the search windows and heatmaps techniques on test images:
+
+![alt text][image5]
+
+<Br/>
+
+## Video Implementation
+
+The code for this step is contained in the 23th to 27th code cells of the IPython notebook located in `P5.ipynb`
+
+A function named `box_process()` is created for integrating box information among the continuously frames.
+The current bounding boxes to draw are calculated by the box-edge pixels in the past 10 frames.
+
+Same as before, `moviepy.editor.VideoFileClip()` was used for video processing. Here's a [link to my video result](./project_output.mp4)
+
+<Br/>
+
+## Discussion
+
+#### 1. Color space selection is an important key to the classifier
+
+Although the SVM is so powerful and a Linear SVM classifier is very fast and accurate, different color spaces can result in different test accuracy, which might be a difference above 10%.
+
+So, the `'YCrCb'` color space was choosen for this project because of its enough good training speed and test accuracy.
+
+#### 2. Counter false positives 
+
+Computer vision might not be a perfect solution on countering false positives. There are some miss accuracy of classifiers, some confuse shapes or shadows, some mixed colors, and so on, to make false positive. 
+
+Those problems can be fixed in one project, but it would be hard to solve in a real time self driving scene.
+
+
+#### 3. Traditional Computer Vision or Deep Neural Network
+
+Both approaches have their strengths and weaknesses, in terms of performance, development effort, interpretability, etc.
+
+There are some good Deep Neural Network algorithm for target detection, such as Faster-RCNN, which is published in recent year. It should be exciting to practise this project again on Deep Neural Network later.
