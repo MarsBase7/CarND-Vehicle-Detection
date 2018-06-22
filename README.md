@@ -7,7 +7,12 @@
 [image2]: ./output_images/HOG_features.png
 [image3]: ./output_images/spatial_samples.png
 [image4]: ./output_images/slide_window.png
-[image5]: ./output_images/heatmap.png
+[image5]: ./output_images/heatmap1.png
+[image6]: ./output_images/heatmap2.png
+[image7]: ./output_images/heatmap3.png
+[image8]: ./output_images/heatmap4.png
+[image9]: ./output_images/heatmap5.png
+[image10]: ./output_images/heatmap6.png
 
 
 This is a brief writeup report of Self-Driving Car Engineer P5.
@@ -39,7 +44,7 @@ This is a brief writeup report of Self-Driving Car Engineer P5.
 
 The code for this step is contained in the 2nd to 10th code cells of the IPython notebook located in `P5.ipynb`
 
-#### 1. Traing Data
+#### 1. Labeled training Data
 
 The traing data includes two parts of labeled [vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/vehicles.zip) and [non-vehicle](https://s3.amazonaws.com/udacity-sdc/Vehicle_Tracking/non-vehicles.zip) examples. It has 8792 vehicle images and 8968 non-vehicle images, which are from a combination of the [GTI vehicle image database](http://www.gti.ssr.upm.es/data/Vehicle_database.html), the [KITTI vision benchmark suite](http://www.cvlibs.net/datasets/kitti/), and examples extracted from the project video itself.
 
@@ -122,6 +127,11 @@ Use `scipy.ndimage.measurements.label()` to find the heat map of each vehicle de
 Here are the results of combining the search windows and heatmaps techniques on test images:
 
 ![alt text][image5]
+![alt text][image6]
+![alt text][image7]
+![alt text][image8]
+![alt text][image9]
+![alt text][image10]
 
 <Br/>
 
@@ -132,7 +142,15 @@ The code for this step is contained in the 23th to 27th code cells of the IPytho
 A function named `box_process()` is created for integrating box information among the continuously frames.
 The current bounding boxes to draw are calculated by the box-edge pixels in the past 10 frames.
 
-Same as before, `moviepy.editor.VideoFileClip()` was used for video processing. Here's a [link to my video result](./project_output.mp4)
+In addition, the pipeline includes these functions defined in the project:
+
+* `search_windows()`
+* `add_heat()`
+* `apply_threshold()`
+
+Same as before, `moviepy.editor.VideoFileClip()` was used for video processing. 
+
+Here's a [link to my video result](./project_output.mp4)
 
 <Br/>
 
